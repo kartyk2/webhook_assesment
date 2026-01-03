@@ -11,6 +11,7 @@ Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
+
 def get_db():
     db = SessionLocal()
     try:
@@ -18,27 +19,23 @@ def get_db():
     finally:
         db.close()
 
+
 # ---------------- Health Check ----------------
 @app.get("/")
 def health_check():
-    return {
-        "status": "HEALTHY",
-        "current_time": datetime.utcnow().isoformat() + "Z"
-    }
+    return {"status": "HEALTHY", "current_time": datetime.utcnow().isoformat() + "Z"}
+
 
 # ---------------- Webhook ----------------
 @app.post("/v1/webhooks/transactions", status_code=202)
 def receive_webhook(
     payload: TransactionWebhook,
     background_tasks: BackgroundTasks,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
-    tx = db.query(Transaction).filter_by(
-        transaction_id=payload.transaction_id
-    ).first()
+    tx = db.query(Transaction).filter_by(transaction_id=payload.transaction_id).first()
 
     if tx:
-        # Idempotent behavior
         return
 
     tx = Transaction(
@@ -47,7 +44,7 @@ def receive_webhook(
         destination_account=payload.destination_account,
         amount=payload.amount,
         currency=payload.currency,
-        status="PROCESSING"
+        status="PROCESSING",
     )
 
     db.add(tx)
@@ -55,6 +52,7 @@ def receive_webhook(
 
     background_tasks.add_task(process_transaction, db, payload.transaction_id)
     return
+
 
 # ---------------- Status Query ----------------
 @app.get("/v1/transactions/{transaction_id}", response_model=TransactionResponse)
