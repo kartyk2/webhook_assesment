@@ -1,3 +1,4 @@
+from typing import List
 from fastapi import FastAPI, BackgroundTasks, Depends, HTTPException
 from sqlalchemy.orm import Session
 from datetime import datetime
@@ -55,9 +56,9 @@ def receive_webhook(
 
 
 # ---------------- Status Query ----------------
-@app.get("/v1/transactions/{transaction_id}", response_model=TransactionResponse)
+@app.get("/v1/transactions/{transaction_id}", response_model=List[TransactionResponse])
 def get_transaction(transaction_id: str, db: Session = Depends(get_db)):
-    tx = db.query(Transaction).filter_by(transaction_id=transaction_id).first()
+    tx = db.query(Transaction).filter_by(transaction_id=transaction_id).all()
     if not tx:
         raise HTTPException(status_code=404, detail="Transaction not found")
     return tx
