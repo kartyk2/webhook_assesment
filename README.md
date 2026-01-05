@@ -15,7 +15,7 @@ A minimal **FastAPI** service that accepts transaction webhooks, stores them ide
 * **SQLAlchemy** – ORM
 * **Pydantic** – Validation
 * **Uvicorn** – ASGI server
-* **SQLite / PostgreSQL** – Database
+* **SQLite** – Database
 
 ---
 
